@@ -48,18 +48,25 @@ class ViewController: UIViewController, LinkOAuthHandling {
     }
 
     @IBAction func didTapButton(_ sender: Any?) {
+        enum PlaidLinkUILayer {
+            case UIKit
+            case swiftUI
+        }
         enum PlaidLinkSampleFlow {
             case linkToken
             case linkPublicKey // for compatability with LinkKit v1
         }
-        #warning("Select your desired Plaid Link sample flow")
-        let sampleFlow : PlaidLinkSampleFlow = .linkToken
-        switch sampleFlow {
-            case .linkToken:
-            presentPlaidLinkUsingLinkToken()
-        case .linkPublicKey:
-            presentPlaidLinkUsingPublicKey()
+        #warning("Select your desired Plaid Link sample flow and UI layer")
+        let tuple: (PlaidLinkSampleFlow, PlaidLinkUILayer) = (flow: .linkToken, ui: .UIKit)
+        switch tuple {
+            case (.linkToken, .UIKit):
+                presentPlaidLinkUsingLinkToken()
+            case (.linkToken, .swiftUI):
+                presentSwiftUILinkToken()
+            case (.linkPublicKey, .UIKit):
+                presentPlaidLinkUsingPublicKey()
+            case (.linkPublicKey, .swiftUI):
+                presentSwiftUIPublicKey()
         }
     }
-
 }

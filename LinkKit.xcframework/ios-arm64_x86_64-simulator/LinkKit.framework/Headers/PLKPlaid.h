@@ -50,6 +50,8 @@ typedef NS_ENUM(NSInteger, PLKEventNameValue) {
     PLKEventNameValueSubmitCredentials,
     PLKEventNameValueSubmitMFA,
     PLKEventNameValueTransitionView,
+    PLKEventNameValueMatchedSelectInstitution,
+    PLKEventNameValueMatchedSelectVerifyMethod,
 };
 
 
@@ -84,6 +86,9 @@ typedef NS_ENUM(NSInteger, PLKViewNameValue) {
     PLKViewNameValueRecaptcha,
     PLKViewNameValueSelectAccount,
     PLKViewNameValueSelectInstitution,
+    PLKViewNameValueMatchedConsent,
+    PLKViewNameValueMatchedCredential,
+    PLKViewNameValueMatchedMFA,
 };
 
 typedef NS_ENUM(NSInteger, PLKAccountSubtypeValueOther) {
@@ -393,7 +398,7 @@ static NSString *const kPLKDefaultErrorDomain = @"com.plaid.link";
 @interface PLKSuccessMetadata : NSObject
 
 @property(nonatomic, readonly, copy) NSString *linkSessionID;
-@property(nonatomic, readonly) PLKInstitution *insitution;
+@property(nonatomic, readonly) PLKInstitution *institution;
 @property(nonatomic, readonly, copy) NSArray<PLKAccount *> *accounts;
 @property(nonatomic, readonly, nullable, copy) PLKRawJSONMetadata *metadataJSON;
 
@@ -533,15 +538,15 @@ typedef NS_ENUM(NSInteger, PLKEnvironment) {
 
 @property(nonatomic, copy) NSArray<id<PLKAccountSubtype>> *accountSubtypes;
 
-@property(nonatomic) NSURL *webhook;
+@property(nonatomic, nullable) NSURL *webhook;
 
 @property(nonatomic, nullable) PLKOAuthNonceConfiguration *oauthConfiguration;
 
-@property(nonatomic, copy) NSString *userLegalName;
-@property(nonatomic, copy) NSString *userEmailAddress;
-@property(nonatomic, copy) NSString *userPhoneNumber;
+@property(nonatomic, nullable, copy) NSString *userLegalName;
+@property(nonatomic, nullable, copy) NSString *userEmailAddress;
+@property(nonatomic, nullable, copy) NSString *userPhoneNumber;
 
-@property(nonatomic, copy) NSString *linkCustomizationName;
+@property(nonatomic, nullable, copy) NSString *linkCustomizationName;
 
 /// An array of PLKProduct enum cases wrapped in an NSNumber.
 @property(nonatomic, readwrite, copy) NSArray<NSNumber *> *products;
@@ -565,7 +570,10 @@ typedef NS_ENUM(NSInteger, PLKEnvironment) {
 
 @end
 
+/// Both `PLKPresentationHandler` and `PLKDismissalHandler` clsoures take the Plaid Link View Controller to be
+/// presented or dismissed as a parameter.
 typedef void(^PLKPresentationHandler)(UIViewController *);
+typedef void(^PLKDismissalHandler)(UIViewController *);
 
 @protocol PLKHandler <NSObject>
 
@@ -574,9 +582,15 @@ typedef void(^PLKPresentationHandler)(UIViewController *);
 - (void)openWithContextViewController:(UIViewController *)viewController
                               options:(NSDictionary<NSString *, NSString *> *)options;
 
-- (void)openWithPresentationHandler:(PLKPresentationHandler)presentationHandler;
+- (void)openWithPresentationHandler:(PLKPresentationHandler)presentationHandler DEPRECATED_MSG_ATTRIBUTE("openWithPresentationHandler: is deprecated in favor openWithPresentationHandler:dismissalHandler:");
+- (void)openWithPresentationHandler:(PLKPresentationHandler)presentationHandler
+                   dismissalHandler:(PLKDismissalHandler)dismissalHandler;
 
 - (void)openWithPresentationHandler:(PLKPresentationHandler)presentationHandler
+options:(NSDictionary<NSString *, NSString *> *)options  DEPRECATED_MSG_ATTRIBUTE("openWithPresentationHandler:options: is deprecated in favor openWithPresentationHandler:dismissalHandler:options:");
+
+- (void)openWithPresentationHandler:(PLKPresentationHandler)presentationHandler
+                   dismissalHandler:(PLKDismissalHandler)dismissalHandler
                             options:(NSDictionary<NSString *, NSString *> *)options;
 
 - (NSError * __nullable)continueFromRedirectUri:(NSURL *)redirectUri;
